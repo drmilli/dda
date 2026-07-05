@@ -25,6 +25,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "x:verify": "tsx src/scripts/verify-x.ts",
+    "llm:verify": "tsx src/scripts/verify-llm.ts",
+    "evidence:verify": "tsx src/scripts/verify-evidence.ts",
     "lint": "eslint . --ext .ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

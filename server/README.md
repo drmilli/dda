@@ -91,7 +91,8 @@ absent (they emit `inconclusive`, never crash).
 | DB persistence (Neon/Drizzle), evidence invariant, versioned reports | Working (verified against Neon). |
 | Live SSE stream (Redis pub/sub) | Working. |
 | M1 on-chain (authorities, holders, concentration) | Real RPC; **needs `HELIUS_API_KEY`** (public RPC throttles `getTokenLargestAccounts`). |
-| M2 GitHub, M3 Wayback, M5 site crawl, M6 stylometry | Real `fetch`; M2 uses `GITHUB_TOKEN` for rate limits. |
+| M2 GitHub, M5 site crawl, M6 stylometry | Real `fetch`; M2 uses `GITHUB_TOKEN` for rate limits. |
+| M3 X history | Official X API (real account age + numeric id) via `XDataSource` when X creds set, else Wayback-only; rename via Wayback; follow-graph behind a provider seam. |
 | M4 KOL cross-reference | Real; only fires when `kol_wallet` has rows. |
 | Triage Stage A/B | Real (on-chain mcap + Helius metadata for tech-signal scoring). |
 | Evidence store | Cloudinary (signed REST) if configured, else local `./.evidence` fallback. |

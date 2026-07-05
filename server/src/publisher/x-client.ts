@@ -1,6 +1,6 @@
-import { createHmac, randomBytes } from 'node:crypto';
 import { env } from '../lib/env.js';
 import { logger } from '../lib/logger.js';
+import { oauthHeader, hasXCreds } from '../lib/x/oauth.js';
 
 /**
  * X posting client. Plain-text verdict + exactly one link (keeps within the
@@ -15,43 +15,11 @@ export interface XPostResult {
   dryRun: boolean;
 }
 
+export { hasXCreds };
+
 // X wraps every URL to a fixed t.co length regardless of the real URL.
 const TCO_LEN = 23;
 const MAX_TWEET = 280;
-
-const enc = (s: string) =>
-  encodeURIComponent(s).replace(/[!*'()]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
-
-export function hasXCreds(): boolean {
-  return Boolean(env.X_API_KEY && env.X_API_SECRET && env.X_ACCESS_TOKEN && env.X_ACCESS_SECRET);
-}
-
-/** OAuth 1.0a Authorization header (JSON body params are not part of the signature). */
-function oauthHeader(method: string, url: string): string {
-  const params: Record<string, string> = {
-    oauth_consumer_key: env.X_API_KEY!,
-    oauth_nonce: randomBytes(16).toString('hex'),
-    oauth_signature_method: 'HMAC-SHA1',
-    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
-    oauth_token: env.X_ACCESS_TOKEN!,
-    oauth_version: '1.0',
-  };
-  const base = [
-    method.toUpperCase(),
-    enc(url),
-    enc(Object.keys(params).sort().map((k) => `${enc(k)}=${enc(params[k]!)}`).join('&')),
-  ].join('&');
-  const signingKey = `${enc(env.X_API_SECRET!)}&${enc(env.X_ACCESS_SECRET!)}`;
-  const signature = createHmac('sha1', signingKey).update(base).digest('base64');
-  const all = { ...params, oauth_signature: signature };
-  return (
-    'OAuth ' +
-    Object.keys(all)
-      .sort()
-      .map((k) => `${enc(k)}="${enc(all[k as keyof typeof all]!)}"`)
-      .join(', ')
-  );
-}
 
 /** Trim the verdict so verdict + " " + url fits X's 280-char limit (URL = 23). */
 function composeTweet(text: string, reportUrl: string): string {

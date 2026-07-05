@@ -16,17 +16,25 @@ interface Creds {
   secret: string;
 }
 
+// Reject the .env.example placeholders so a copy-paste default never counts as
+// "configured" (which would 401 on every upload and silently fail evidence).
+const PLACEHOLDERS = new Set(['api_key', 'api_secret', 'cloud_name', '']);
+function real(c: Creds): Creds | null {
+  if (PLACEHOLDERS.has(c.key) || PLACEHOLDERS.has(c.secret) || PLACEHOLDERS.has(c.cloud)) return null;
+  return c;
+}
+
 function creds(): Creds | null {
   if (env.CLOUDINARY_URL) {
     const m = env.CLOUDINARY_URL.match(/^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/);
-    if (m) return { key: m[1]!, secret: m[2]!, cloud: m[3]! };
+    if (m) return real({ key: m[1]!, secret: m[2]!, cloud: m[3]! });
   }
   if (env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET) {
-    return {
+    return real({
       cloud: env.CLOUDINARY_CLOUD_NAME,
       key: env.CLOUDINARY_API_KEY,
       secret: env.CLOUDINARY_API_SECRET,
-    };
+    });
   }
   return null;
 }

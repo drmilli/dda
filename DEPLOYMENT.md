@@ -82,8 +82,10 @@ Posts stay **simulated** until you deliberately enable them.
 > and self-tests via `x:verify`, but has **not** been exercised against a real account here —
 > validate on a throwaway account first.
 >
-> **Reads** (Module 3 affiliation/follow checks) still use the free Wayback Machine, not the paid X
-> read API — the `XDataSource` provider integration is future work.
+> **Reads** (Module 3): the official X API is now wired for real account age + numeric id (via the
+> same OAuth 1.0a creds), with Wayback for rename/squat detection. Full follower-graph checks are
+> gated behind the third-party provider seam (`X_READ_PROVIDER_KEY` + `M3.read_provider`), which is
+> a stub until a provider is chosen — so affiliation stays mentions-only.
 
 ## 6. Smoke test after deploy
 
@@ -103,7 +105,8 @@ Then open the Vercel site → the report appears in the archive; open it live to
 - [ ] `ALLOWED_ORIGINS` = exact Vercel origin (not `*`).
 - [ ] `ADMIN_TOKEN` set (or the review queue is unusable — fails closed).
 - [ ] `HELIUS_API_KEY` set (public RPC throttles holder reads).
-- [ ] `CLOUDINARY_URL` set (else evidence uses ephemeral local disk on Render — lost on redeploy).
+- [ ] `CLOUDINARY_URL` set + `npm run evidence:verify` passes (else evidence uses ephemeral local disk on Render — lost on redeploy). Placeholder creds are rejected and fall back to local.
+- [ ] `LLM_API_KEY` set + `npm run llm:verify` passes (else summaries use the deterministic template).
 - [ ] `PUBLISHER_DRY_RUN=false` **only** after validating X OAuth on a test account.
 - [ ] Helius webhook secret configured on both ends.
 - [ ] Run one real battery end-to-end; confirm the live stream and a finalized report.
