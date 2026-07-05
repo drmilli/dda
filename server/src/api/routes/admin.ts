@@ -9,7 +9,7 @@ import {
   getProjectById,
   insertPublishEvent,
 } from '../../db/repo.js';
-import { postToX } from '../../publisher/x-client.js';
+import { postToX, hasXCreds, verifyCredentials } from '../../publisher/x-client.js';
 import { requireAdmin } from '../auth.js';
 
 const actionSchema = z.object({
@@ -29,6 +29,18 @@ const actionSchema = z.object({
 export async function registerAdminRoutes(app: FastifyInstance): Promise<void> {
   app.get('/api/admin/review-queue', { preHandler: requireAdmin }, async () => {
     return listReviewQueue();
+  });
+
+  // X posting status — lets an approver confirm live-vs-dry-run before acting.
+  app.get('/api/admin/x-status', { preHandler: requireAdmin }, async () => {
+    const configured = hasXCreds();
+    let account: string | null = null;
+    if (configured) {
+      account = await verifyCredentials()
+        .then((u) => `@${u.username}`)
+        .catch(() => null);
+    }
+    return { configured, dryRun: env.PUBLISHER_DRY_RUN, account };
   });
 
   app.post<{ Params: { findingId: string } }>(

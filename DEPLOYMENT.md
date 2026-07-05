@@ -65,7 +65,27 @@ Authorization: Bearer <HELIUS_WEBHOOK_SECRET>
 
 Or drive it manually from the site's submit bar (`POST /api/submit`).
 
-## 5. Smoke test after deploy
+## 5. X publishing (optional, off by default)
+
+Posts stay **simulated** until you deliberately enable them.
+
+1. Use a **Premium+** X account (raises the 50 posts/day cap; required for meaningful volume).
+2. In the X developer portal, create an app with **Read and Write** permission and OAuth 1.0a
+   user-context. Grab: API key/secret (consumer) + access token/secret (for the posting account).
+3. Set `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET` in the Render env group.
+4. **Verify without posting:** `npm run x:verify` (or `GET /api/admin/x-status`) → confirms the
+   authenticated handle and whether posting is live or dry-run.
+5. Only then set `PUBLISHER_DRY_RUN=false`. The publisher auto-posts one link post per report for
+   auto-tier on-chain/GitHub facts; everything person-naming stays in the human review queue.
+
+> The write path (OAuth 1.0a signing, 280-char/​t.co length guard, transient retry) is implemented
+> and self-tests via `x:verify`, but has **not** been exercised against a real account here —
+> validate on a throwaway account first.
+>
+> **Reads** (Module 3 affiliation/follow checks) still use the free Wayback Machine, not the paid X
+> read API — the `XDataSource` provider integration is future work.
+
+## 6. Smoke test after deploy
 
 ```bash
 API=https://dda-api.onrender.com

@@ -15,9 +15,18 @@ export interface XPostResult {
   dryRun: boolean;
 }
 
-const enc = (s: string) => encodeURIComponent(s).replace(/[!*'()]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+// X wraps every URL to a fixed t.co length regardless of the real URL.
+const TCO_LEN = 23;
+const MAX_TWEET = 280;
 
-/** OAuth 1.0a Authorization header for a JSON POST (body params are not signed). */
+const enc = (s: string) =>
+  encodeURIComponent(s).replace(/[!*'()]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+
+export function hasXCreds(): boolean {
+  return Boolean(env.X_API_KEY && env.X_API_SECRET && env.X_ACCESS_TOKEN && env.X_ACCESS_SECRET);
+}
+
+/** OAuth 1.0a Authorization header (JSON body params are not part of the signature). */
 function oauthHeader(method: string, url: string): string {
   const params: Record<string, string> = {
     oauth_consumer_key: env.X_API_KEY!,
@@ -35,31 +44,67 @@ function oauthHeader(method: string, url: string): string {
   const signingKey = `${enc(env.X_API_SECRET!)}&${enc(env.X_ACCESS_SECRET!)}`;
   const signature = createHmac('sha1', signingKey).update(base).digest('base64');
   const all = { ...params, oauth_signature: signature };
-  return 'OAuth ' + Object.keys(all).sort().map((k) => `${enc(k)}="${enc(all[k as keyof typeof all]!)}"`).join(', ');
+  return (
+    'OAuth ' +
+    Object.keys(all)
+      .sort()
+      .map((k) => `${enc(k)}="${enc(all[k as keyof typeof all]!)}"`)
+      .join(', ')
+  );
+}
+
+/** Trim the verdict so verdict + " " + url fits X's 280-char limit (URL = 23). */
+function composeTweet(text: string, reportUrl: string): string {
+  const budget = MAX_TWEET - TCO_LEN - 1;
+  const trimmed = text.length > budget ? `${text.slice(0, budget - 1).trimEnd()}…` : text;
+  return `${trimmed} ${reportUrl}`.trim();
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Read-only credential check (GET /2/users/me). Safe to run anytime — it never
+ * posts. Use it to validate the OAuth setup before enabling live posting.
+ */
+export async function verifyCredentials(): Promise<{ id: string; username: string }> {
+  if (!hasXCreds()) throw new Error('X credentials incomplete (need X_API_KEY/SECRET + X_ACCESS_TOKEN/SECRET)');
+  const url = 'https://api.twitter.com/2/users/me';
+  const res = await fetch(url, { headers: { Authorization: oauthHeader('GET', url) } });
+  if (!res.ok) throw new Error(`X credential check failed: ${res.status} ${await res.text()}`);
+  const json = (await res.json()) as { data?: { id: string; username: string } };
+  if (!json.data) throw new Error('X credential check: no user in response');
+  return json.data;
 }
 
 export async function postToX(text: string, reportUrl: string): Promise<XPostResult> {
-  const body = `${text} ${reportUrl}`.trim();
-  const hasCreds = Boolean(
-    env.X_API_KEY && env.X_API_SECRET && env.X_ACCESS_TOKEN && env.X_ACCESS_SECRET,
-  );
+  const body = composeTweet(text, reportUrl);
 
-  if (env.PUBLISHER_DRY_RUN || !hasCreds) {
-    logger.info({ body }, 'X post (dry-run)');
+  if (env.PUBLISHER_DRY_RUN || !hasXCreds()) {
+    logger.info({ body, chars: body.length }, 'X post (dry-run)');
     return { xPostId: `dryrun-${Date.now()}`, dryRun: true };
   }
 
   const url = 'https://api.twitter.com/2/tweets';
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { Authorization: oauthHeader('POST', url), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: body }),
-  });
-  if (!res.ok) {
-    throw new Error(`X post failed: ${res.status} ${await res.text()}`);
+  let lastErr = '';
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { Authorization: oauthHeader('POST', url), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: body }),
+    });
+    if (res.ok) {
+      const json = (await res.json()) as { data?: { id?: string } };
+      const id = json.data?.id;
+      if (!id) throw new Error('X post: no tweet id in response');
+      return { xPostId: id, dryRun: false };
+    }
+    lastErr = `${res.status} ${await res.text()}`;
+    // Retry transient throttle/server errors; fail fast on auth/validation (4xx).
+    if (res.status === 429 || res.status >= 500) {
+      await sleep(1000 * 2 ** attempt);
+      continue;
+    }
+    break;
   }
-  const json = (await res.json()) as { data?: { id?: string } };
-  const id = json.data?.id;
-  if (!id) throw new Error('X post: no tweet id in response');
-  return { xPostId: id, dryRun: false };
+  throw new Error(`X post failed: ${lastErr}`);
 }
