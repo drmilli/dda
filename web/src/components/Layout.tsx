@@ -11,8 +11,8 @@ export function Layout({ children }: { children: ReactNode }) {
           DDA<span className="sub">// on-chain due diligence</span>
         </NavLink>
         <nav className="nav">
-          <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>
-            archive
+          <NavLink to="/app" className={({ isActive }) => (isActive ? 'active' : '')}>
+            reports
           </NavLink>
           <NavLink to="/admin" className={({ isActive }) => (isActive ? 'active' : '')}>
             review

@@ -715,3 +715,248 @@ a:hover {
   font-size: 12.5px;
   padding: 8px 0;
 }
+
+/* ── buttons (primary + large, for landing) ──────────────────────────── */
+.btn--primary {
+  background: var(--accent);
+  color: #05130c;
+  border-color: var(--accent);
+  font-weight: 700;
+}
+.btn--primary:hover {
+  color: #05130c;
+  filter: brightness(1.08);
+  border-color: var(--accent);
+}
+.btn--lg {
+  font-size: 13px;
+  padding: 11px 18px;
+}
+
+/* ── landing ─────────────────────────────────────────────────────────── */
+.landing section {
+  margin-bottom: 56px;
+}
+.hero {
+  text-align: center;
+  padding: 32px 0 8px;
+}
+.hero h1 {
+  font-family: var(--mono);
+  font-size: clamp(28px, 5vw, 46px);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin: 14px auto 0;
+  max-width: 18ch;
+}
+.hero .sub {
+  color: var(--text-dim);
+  font-size: clamp(14px, 2vw, 16px);
+  line-height: 1.6;
+  max-width: 62ch;
+  margin: 18px auto 0;
+}
+.hero-cta {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 26px 0 36px;
+}
+.hero-term {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: left;
+}
+.hero-term .term {
+  min-height: 0;
+  font-size: 12px;
+}
+
+.lgrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+.lcard {
+  padding: 20px;
+}
+.lcard h3 {
+  font-family: var(--mono);
+  font-size: 15px;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+.lcard p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.flow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.flow-step {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--bg-panel);
+  padding: 16px;
+}
+.flow-n {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.flow-t {
+  font-family: var(--mono);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.flow-d {
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.modgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.modcard {
+  padding: 16px;
+}
+.modcard-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.modcard-name {
+  font-family: var(--mono);
+  font-weight: 700;
+  flex: 1;
+}
+.modcard p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  text-align: center;
+}
+.stat {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px 12px;
+  background: var(--bg-panel);
+}
+.stat-n {
+  font-family: var(--mono);
+  font-size: clamp(22px, 3vw, 30px);
+  color: var(--accent);
+}
+.stat-l {
+  color: var(--text-faint);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  margin-top: 6px;
+}
+
+.cta-band {
+  text-align: center;
+  padding: 40px 24px;
+}
+.cta-band h2 {
+  font-family: var(--mono);
+  font-size: clamp(22px, 3vw, 30px);
+  margin: 0 0 10px;
+}
+.cta-band p {
+  color: var(--text-dim);
+  margin: 0 0 22px;
+}
+
+/* ── responsive / mobile ─────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .lgrid,
+  .flow,
+  .modgrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .topbar {
+    height: 52px;
+    padding: 0 14px;
+    gap: 12px;
+  }
+  .topbar .meta {
+    display: none;
+  }
+  .brand .sub {
+    display: none;
+  }
+  .nav a {
+    padding: 6px 9px;
+  }
+  .main {
+    padding: 22px 14px 64px;
+  }
+  .lgrid,
+  .flow,
+  .modgrid,
+  .stats {
+    grid-template-columns: 1fr;
+  }
+  .stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .hero {
+    padding: 16px 0 4px;
+  }
+  .rd-head {
+    padding: 16px;
+  }
+  .rd-head h1 {
+    font-size: 17px;
+  }
+  .rd-head .idline {
+    gap: 8px;
+  }
+  .check .chead {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .check .cbody {
+    padding: 12px;
+  }
+  .check .ts {
+    margin-left: 0;
+  }
+  .rcard .top {
+    flex-wrap: wrap;
+  }
+  .section-label {
+    flex-wrap: wrap;
+  }
+  .hero-cta .btn {
+    flex: 1;
+    text-align: center;
+  }
+  .term {
+    font-size: 11.5px;
+    padding: 12px;
+  }
+}

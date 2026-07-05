@@ -30,7 +30,7 @@ export function ReportDetail() {
     return (
       <div className="empty">
         <div>report not found — {error ?? 'no data'}</div>
-        <Link className="btn" style={{ marginTop: 12, display: 'inline-block' }} to="/">
+        <Link className="btn" style={{ marginTop: 12, display: 'inline-block' }} to="/app">
           ← back to archive
         </Link>
       </div>
