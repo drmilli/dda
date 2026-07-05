@@ -14,7 +14,15 @@ export function startWorker<T>(name: string, processor: Processor<T>, concurrenc
   worker.on('failed', (job, err) => {
     logger.error({ queue: name, jobId: job?.id, attempts: job?.attemptsMade, err }, 'job failed');
   });
-  worker.on('error', (err) => logger.error({ queue: name, err }, 'worker error'));
+  // Throttle transport-level errors (e.g. Redis outage) to avoid log floods.
+  let lastErr = 0;
+  worker.on('error', (err: Error & { code?: string }) => {
+    const now = Date.now();
+    if (now - lastErr > 10_000) {
+      lastErr = now;
+      logger.warn({ queue: name, code: err.code ?? err.message }, 'worker transport error');
+    }
+  });
 
   onShutdown(async () => {
     await worker.close();

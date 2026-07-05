@@ -3,6 +3,16 @@ import { bullConnection } from './connection.js';
 import type { LaunchEvent, ModuleId } from '../types/index.js';
 
 /**
+ * BullMQ Queue instances re-emit connection 'error' events; without a listener
+ * Node prints a full stack per retry. The connection-level handler already logs
+ * one throttled warning, so swallow these to keep logs clean.
+ */
+function quiet<T>(q: Queue<T>): Queue<T> {
+  q.on('error', () => {});
+  return q;
+}
+
+/**
  * One queue per stage/module, per docs/infrastructure.md#queue-topology.
  * Failure in one module's queue never blocks another or ingestion.
  */
@@ -18,7 +28,8 @@ const defaultJobOptions: DefaultJobOptions = {
 export const QUEUE_NAMES = {
   triage: 'triage',
   orchestrate: 'orchestrate',
-  module: (m: ModuleId) => `module:${m}` as const,
+  // NB: BullMQ forbids ':' in queue names (reserved for Redis keys) — use '-'.
+  module: (m: ModuleId) => `module-${m}` as const,
   aggregate: 'aggregate',
   publish: 'publish',
 } as const;
@@ -46,16 +57,16 @@ export interface PublishJob {
 }
 
 // ── Producer-side queue instances ───────────────────────────────────────
-export const triageQueue = new Queue<TriageJob>(QUEUE_NAMES.triage, { connection: bullConnection, defaultJobOptions });
-export const orchestrateQueue = new Queue<OrchestrateJob>(QUEUE_NAMES.orchestrate, { connection: bullConnection, defaultJobOptions });
-export const aggregateQueue = new Queue<AggregateJob>(QUEUE_NAMES.aggregate, { connection: bullConnection, defaultJobOptions });
-export const publishQueue = new Queue<PublishJob>(QUEUE_NAMES.publish, { connection: bullConnection, defaultJobOptions });
+export const triageQueue = quiet(new Queue<TriageJob>(QUEUE_NAMES.triage, { connection: bullConnection, defaultJobOptions }));
+export const orchestrateQueue = quiet(new Queue<OrchestrateJob>(QUEUE_NAMES.orchestrate, { connection: bullConnection, defaultJobOptions }));
+export const aggregateQueue = quiet(new Queue<AggregateJob>(QUEUE_NAMES.aggregate, { connection: bullConnection, defaultJobOptions }));
+export const publishQueue = quiet(new Queue<PublishJob>(QUEUE_NAMES.publish, { connection: bullConnection, defaultJobOptions }));
 
 const moduleQueues = new Map<ModuleId, Queue<ModuleJob>>();
 export function moduleQueue(m: ModuleId): Queue<ModuleJob> {
   let q = moduleQueues.get(m);
   if (!q) {
-    q = new Queue<ModuleJob>(QUEUE_NAMES.module(m), { connection: bullConnection, defaultJobOptions });
+    q = quiet(new Queue<ModuleJob>(QUEUE_NAMES.module(m), { connection: bullConnection, defaultJobOptions }));
     moduleQueues.set(m, q);
   }
   return q;

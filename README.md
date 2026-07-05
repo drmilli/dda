@@ -78,6 +78,7 @@ Helius / Geyser / Solana RPC · Streamflow SDK · GitHub REST API ·
 
 ## Documentation
 
+- **[Deployment](DEPLOYMENT.md)** — ship it: Vercel (frontend) + Render (backend) + Neon.
 - **[Engineering Brief](docx.md)** — the product rationale and the "why."
 - **[Technical Docs](docs/README.md)** — the "how":
   [architecture](docs/architecture.md) ·
@@ -94,8 +95,12 @@ Helius / Geyser / Solana RPC · Streamflow SDK · GitHub REST API ·
 
 ## Status
 
-Early / pre-implementation. The design is documented; the MVP (Module 1 + ingestion + triage +
-evidence store + report page) is the first build milestone — see the
+Implemented and deploy-ready. Backend (ingestion → triage → six modules → aggregation →
+confidence-gated publisher) and frontend (archive, submit, live SSE, report pages, dispute form,
+admin review queue) are built, typecheck/build clean, and verified against real Neon + Solana RPC.
+Deploy config for Vercel + Render is in [DEPLOYMENT.md](DEPLOYMENT.md); production hardening in
+[server/PRODUCTION.md](server/PRODUCTION.md). Remaining before a live launch: one full battery run
+through Redis, real X-posting credentials, and the Streamflow lock check — see the
 [roadmap](docs/roadmap.md).
 
 ---

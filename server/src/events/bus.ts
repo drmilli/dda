@@ -1,4 +1,4 @@
-import { connection } from '../queue/connection.js';
+import { connection, attachRedisErrorHandler } from '../queue/connection.js';
 import type { StreamLine } from '../types/index.js';
 
 /**
@@ -30,6 +30,7 @@ export function subscribeStream(
   onMessage: (msg: StreamMessage) => void,
 ): () => void {
   const sub = connection.duplicate();
+  attachRedisErrorHandler(sub, 'redis-sub');
   void sub.subscribe(channel(reportId));
   sub.on('message', (_ch, payload) => {
     try {
