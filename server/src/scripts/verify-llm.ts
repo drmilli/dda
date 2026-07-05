@@ -11,8 +11,8 @@ async function main() {
     process.exit(1);
   }
   try {
-    const { model } = await verifyLlm();
-    console.log(`✓ LLM reachable — model "${model}" responded.`);
+    const { provider, model } = await verifyLlm();
+    console.log(`✓ LLM reachable — ${provider} · model "${model}" responded.`);
     process.exit(0);
   } catch (e) {
     console.error('✗', e instanceof Error ? e.message : e);

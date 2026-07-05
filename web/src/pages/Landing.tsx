@@ -36,8 +36,13 @@ export function Landing() {
     <div className="landing">
       {/* Hero */}
       <section className="hero">
-        <div className="eyebrow">autonomous · falsifiable · sourced</div>
-        <h1>On-chain due diligence that shows its work.</h1>
+        <div className="hero-badge">
+          <span className="dot" />
+          autonomous · live
+        </div>
+        <h1>
+          On-chain due diligence that <span className="grad">shows its work</span>.
+        </h1>
         <p className="sub">
           An always-on agent watches new Solana token launches, runs a battery of mechanical
           verification checks against the ones gaining traction, and publishes evidence-backed

@@ -41,8 +41,10 @@ const schema = z.object({
   X_READ_PROVIDER_KEY: z.string().optional(),
 
   // LLM (summary only, downstream of persistence)
+  LLM_PROVIDER: z.enum(['anthropic', 'openai', 'nvidia']).default('anthropic'),
   LLM_API_KEY: z.string().optional(),
   LLM_MODEL: z.string().default('claude-sonnet-5'),
+  LLM_BASE_URL: z.string().optional(), // for openai/nvidia; defaults per provider
 
   // Publisher
   PUBLISHER_DRY_RUN: z

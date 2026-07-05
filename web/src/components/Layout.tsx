@@ -1,11 +1,15 @@
 import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
+import { AmbientCanvas } from './AmbientCanvas.js';
 
-/** App shell — sticky terminal-style topbar + centered main column. */
+/** App shell — animated WebGL backdrop + sticky topbar + centered main column. */
 export function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="shell">
-      <header className="topbar">
+    <>
+      <AmbientCanvas />
+      <div className="shell">
+        <div className="fx-noise" aria-hidden />
+        <header className="topbar">
         <NavLink to="/" className="brand">
           <span className="dot" />
           DDA<span className="sub">// on-chain due diligence</span>
@@ -21,8 +25,9 @@ export function Layout({ children }: { children: ReactNode }) {
         <span className="spacer" />
         <span className="meta">evidence or it didn't happen</span>
       </header>
-      <main className="main">{children}</main>
-    </div>
+        <main className="main">{children}</main>
+      </div>
+    </>
   );
 }
 
