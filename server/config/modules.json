@@ -1,0 +1,13 @@
+{
+  "M1": { "concurrency": 8, "timeout_ms": 15000, "rpc": "helius" },
+  "M2": { "concurrency": 4, "timeout_ms": 20000 },
+  "M3": {
+    "concurrency": 2,
+    "timeout_ms": 30000,
+    "follow_check": "mentions_only",
+    "read_provider": "sorsa"
+  },
+  "M4": { "concurrency": 2, "timeout_ms": 15000 },
+  "M5": { "concurrency": 2, "timeout_ms": 45000, "headless": true },
+  "M6": { "concurrency": 4, "timeout_ms": 5000 }
+}

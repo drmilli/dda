@@ -1,0 +1,13 @@
+# Local dependencies for development. Postgres is Neon (cloud) — only Redis is
+# needed locally for BullMQ. Start with: docker compose up -d
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    command: ['redis-server', '--maxmemory-policy', 'noeviction']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5

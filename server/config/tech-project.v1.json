@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "signals": [
+    { "key": "has_github", "weight": 2 },
+    {
+      "key": "has_website",
+      "weight": 2,
+      "exclude": ["linktr.ee", "beacons.ai", "linkin.bio"]
+    },
+    {
+      "key": "tech_language",
+      "weight": 1,
+      "per_hit": true,
+      "cap": 3,
+      "terms": ["protocol", "SDK", "AI agent", "testnet", "mainnet", "API", "infra"]
+    }
+  ],
+  "pass_threshold": 3
+}

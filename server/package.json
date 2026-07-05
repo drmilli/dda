@@ -1,0 +1,52 @@
+{
+  "name": "dda-server",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Autonomous on-chain due-diligence agent — backend (ingestion, triage, modules, publisher, API).",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/entrypoints/web.ts",
+    "dev:all": "concurrently -n web,ingest,triage,orch,workers,pub -c auto \"npm:dev:web\" \"npm:dev:ingestion\" \"npm:dev:triage\" \"npm:dev:orchestrator\" \"npm:dev:workers\" \"npm:dev:publisher\"",
+    "dev:web": "tsx watch src/entrypoints/web.ts",
+    "dev:ingestion": "tsx watch src/entrypoints/ingestion.ts",
+    "dev:triage": "tsx watch src/entrypoints/triage.ts",
+    "dev:orchestrator": "tsx watch src/entrypoints/orchestrator.ts",
+    "dev:workers": "tsx watch src/entrypoints/workers.ts",
+    "dev:aggregator": "tsx watch src/entrypoints/aggregator.ts",
+    "dev:publisher": "tsx watch src/entrypoints/publisher.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/entrypoints/web.js",
+    "start:web": "node dist/entrypoints/web.js",
+    "start:workers": "node dist/entrypoints/all.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "lint": "eslint . --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.0",
+    "@fastify/sensible": "^6.0.0",
+    "bullmq": "^5.0.0",
+    "dotenv": "^16.4.0",
+    "drizzle-orm": "^0.36.0",
+    "fastify": "^5.0.0",
+    "ioredis": "^5.4.0",
+    "pino": "^9.0.0",
+    "postgres": "^3.4.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "concurrently": "^9.0.0",
+    "drizzle-kit": "^0.28.0",
+    "eslint": "^9.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.0.0"
+  }
+}

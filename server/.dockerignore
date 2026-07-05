@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.env.local
+.evidence
+*.log
+.git
+.DS_Store
+coverage
+scratch-*.ts

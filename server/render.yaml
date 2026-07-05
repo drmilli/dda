@@ -1,0 +1,89 @@
+# Render Blueprint — deploy the backend as one web service + one worker service,
+# backed by Render Redis (Neon Postgres is external). Apply via the Render
+# dashboard: New → Blueprint → point at this repo (root: server/).
+#
+# Fill the sync:false secrets in the Render dashboard after the first apply.
+services:
+  # ── HTTP API + SSE ────────────────────────────────────────────────────
+  - type: web
+    name: dda-api
+    runtime: node
+    rootDir: server
+    plan: starter
+    buildCommand: npm install && npm run build
+    preDeployCommand: npm run db:migrate
+    startCommand: node dist/entrypoints/web.js
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: dda-redis
+          property: connectionString
+      - fromGroup: dda-secrets
+
+  # ── All background workers (triage → publisher) in one process ────────
+  - type: worker
+    name: dda-workers
+    runtime: node
+    rootDir: server
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: node dist/entrypoints/all.js
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: dda-redis
+          property: connectionString
+      - fromGroup: dda-secrets
+
+  # ── Redis (BullMQ + rate limiter + SSE pub/sub) ───────────────────────
+  - type: redis
+    name: dda-redis
+    plan: starter
+    maxmemoryPolicy: noeviction
+    ipAllowList: [] # internal-only
+
+# Shared secrets — set values in the dashboard (sync:false keeps them out of git).
+envVarGroups:
+  - name: dda-secrets
+    envVars:
+      - key: DATABASE_URL # Neon pooled
+        sync: false
+      - key: DATABASE_URL_DIRECT # Neon direct (no -pooler); used by migrations
+        sync: false
+      - key: PUBLIC_BASE_URL # https://dda-api.onrender.com
+        sync: false
+      - key: ALLOWED_ORIGINS # https://your-app.vercel.app
+        sync: false
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: HELIUS_API_KEY
+        sync: false
+      - key: HELIUS_WEBHOOK_SECRET
+        generateValue: true
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: CLOUDINARY_URL
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: claude-sonnet-5
+      - key: PUBLISHER_DRY_RUN
+        value: 'true'
+      - key: X_API_KEY
+        sync: false
+      - key: X_API_SECRET
+        sync: false
+      - key: X_ACCESS_TOKEN
+        sync: false
+      - key: X_ACCESS_SECRET
+        sync: false

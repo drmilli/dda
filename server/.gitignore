@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+.DS_Store
+coverage/
+drizzle/meta/_journal.json.bak
+
+# local evidence fallback + scratch
+.evidence/
+scratch-*.ts

@@ -1,0 +1,9 @@
+{
+  "stage_a": {
+    "min_age_hours": 1,
+    "min_market_cap_usd": 10000,
+    "recheck_window_hours": 24,
+    "recheck_interval_minutes": 30,
+    "borderline_mcap_band_pct": 20
+  }
+}
